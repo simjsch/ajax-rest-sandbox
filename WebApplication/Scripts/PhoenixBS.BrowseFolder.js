@@ -65,8 +65,16 @@ var WorkSiteFolders = function () {
         var hidden = $("#main").find("#hdn-objectid-" + index);
         var buttonPanel = hidden.parents("div.well").find("div:nth-child(2)");
         var detailsPanel = hidden.parents("div.well").find("div:nth-child(3)");
+        var tree = detailsPanel.find("#tree-" + index);
+        if (tree.is(":empty")) {
+            tree.fancytree({
+                source: {
+                    url: 'http://localhost/TestService/api/folders',
+                    cache: false
+                }
+            });
+        }
         detailsPanel.show();
-        detailsPanel.find("#tree-" + index).jstree();
         var button = buttonPanel.find("#btn-showdetails-" + index);
         button.text("Hide Details");
         button.attr("onClick", "WorkSiteFolders.HideDetails(this.id); return false;");
