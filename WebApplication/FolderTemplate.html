@@ -1,16 +1,45 @@
-﻿<div id="folder-template" class="panel panel-default" style="display: none;">
+﻿<div id="folder-template" class="row" style="display: none;">
     <div class="row">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <strong>Name: </strong><span id="name-0"></span><br/>
-                <strong>ID: </strong><span id="id-0"></span><br />
-                <strong>Type: </strong><span id="type-0"></span><br />
-                <strong>Subfolders: </strong><span id="subfolders-0"></span><br />
-                <strong>Documents: </strong><span id="documents-0"></span><br />
-                <input type="hidden" id="hdn-objectid-0" value="" />
-                <a href="#" class="btn btn-default btn-xs">Show Details</a><a href="#" id="btn-remove-0" class="btn btn-danger btn-xs">Remove</a>
+        <div class="container">
+            <div class="well">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <strong>Name: </strong><span id="name-0"></span><br />
+                            <strong>ID: </strong><span id="id-0"></span><br />
+                            <strong>Type: </strong><span id="type-0"></span><br />
+                            <strong>Subfolders: </strong><span id="subfolders-0"></span><br />
+                            <strong>Documents: </strong><span id="documents-0"></span>
+                            <input type="hidden" id="hdn-objectid-0" value="" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-offset-10 col-md-1"><a href="#" id="btn-showdetails-0" class="btn btn-default btn-xs">Show Details</a></div>
+                    <div class="col-md-1"><a href="#" id="btn-remove-0" class="btn btn-danger btn-xs">Remove</a></div>
+                </div>
+                <div class="row" style="display: none;">
+                    <div class="col-md-4">
+                        <div class="panel panel-default">
+                            <div id="tree-0">
+                                <ul>
+                                    <li>
+                                        Root node
+                                        <ul>
+                                            <li id="child_node">Child node</li>
+                                            <li id="child_node">Child node 2</li>
+                                            <li id="child_node">Child node 3</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="panel panel-default">Files</div>
+                    </div>
+                </div>
             </div>
-            <div class="well" style="display: none;"></div>
         </div>
     </div>
 </div>
