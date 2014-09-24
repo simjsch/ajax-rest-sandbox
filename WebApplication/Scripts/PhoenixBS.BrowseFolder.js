@@ -63,19 +63,21 @@ var WorkSiteFolders = function () {
     var _showDetails = function (id) {
         var index = id.replace("btn-showdetails-", "");
         var hidden = $("#main").find("#hdn-objectid-" + index);
-        var buttonPanel = hidden.parents("div.well").find("div:nth-child(2)");
-        var detailsPanel = hidden.parents("div.well").find("div:nth-child(3)");
-        var tree = detailsPanel.find("#tree-" + index);
+        var summaryRow = hidden.parents("div.well").find("div:nth-child(1)");
+        var buttonRow = hidden.parents("div.well").find("div:nth-child(2)");
+        var detailsRow = hidden.parents("div.well").find("div:nth-child(3)");
+        var prjId = summaryRow.find("#id-" + index).text();
+        var tree = detailsRow.find("#tree-" + index);
         if (tree.is(":empty")) {
             tree.fancytree({
                 source: {
-                    url: 'http://localhost/TestService/api/folders',
+                    url: 'http://localhost/TestService/api/folders/' + prjId,
                     cache: false
                 }
             });
         }
-        detailsPanel.show();
-        var button = buttonPanel.find("#btn-showdetails-" + index);
+        detailsRow.show();
+        var button = buttonRow.find("#btn-showdetails-" + index);
         button.text("Hide Details");
         button.attr("onClick", "WorkSiteFolders.HideDetails(this.id); return false;");
     }

@@ -34,9 +34,26 @@ namespace TestService.Controllers
         }
 
         // GET api/<controller>/5
-        public string Get(int id)
+        public JToken Get(int id)
         {
-            return "";
+            return JArray.Parse(@"
+[
+    {
+        'title' : 'Node 1',
+        'key' : '1'
+    },
+    {
+        'title' : 'Folder 2',
+        'key' : '2',
+        'folder' : true,
+        'children' :
+        [
+            { 'title' : 'Node 2.1', 'key' : '3' },
+            { 'title' : 'Node 2.2', 'key' : '4' }
+        ]
+    }
+]"
+            );
         }
 
         // POST api/<controller>
