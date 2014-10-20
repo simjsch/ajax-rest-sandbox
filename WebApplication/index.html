@@ -20,5 +20,46 @@
     <div id="loading">
         <img src="images/ajax-loader.gif" />
     </div>
+
+    <div id="folder-template" class="row" style="display: none;">
+        <div class="row">
+            <div class="container">
+                <div class="well">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <strong>Name: </strong><span id="name-pbs-0"></span><br />
+                                <strong>ID: </strong><span id="id-pbs-0"></span><br />
+                                <strong>Type: </strong><span id="type-pbs-0"></span><br />
+                                <strong>Subfolders: </strong><span id="subfolders-pbs-0"></span><br />
+                                <strong>Documents: </strong><span id="documents-pbs-0"></span>
+                                <input type="hidden" id="hdn-objectid-pbs-0" value="" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-offset-10 col-md-1"><a href="#" id="btn-showdetails-pbs-0" class="btn btn-default btn-xs">Show Details</a></div>
+                        <div class="col-md-1"><a href="#" id="btn-remove-pbs-0" class="btn btn-danger btn-xs">Remove</a></div>
+                    </div>
+                    <div class="row" style="display: none;">
+                        <div class="col-md-4">
+                            <div class="panel panel-default">
+                                <div id="tree-pbs-0"></div>
+                                <div id="tree-buttons-pbs-0" class="btn-group btn-group-justified">
+                                    <a href="#" id="btn-selectall-pbs-0" class="btn btn-default btn-xs">Select All</a>
+                                    <a href="#" id="btn-deselectall-pbs-0" class="btn btn-default btn-xs">Deselect All</a>
+                                    <a href="#" id="btn-removeselected-pbs-0" class="btn btn-danger btn-xs">Remove Selected</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="panel panel-default">Files</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

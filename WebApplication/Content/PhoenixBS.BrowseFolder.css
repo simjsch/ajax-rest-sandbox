@@ -9,3 +9,7 @@
 .btn {
     margin-bottom: 15px;
 }
+
+div[id^="tree-buttons-"] {
+    margin-top: 5px;
+}

@@ -51,44 +51,75 @@ var WorkSiteFolders = function () {
             url: path,
             dataType: 'json',
             success: function (summary) {
-                $("#folder-template").find("#id-" + index).text(summary.prj_id);
-                $("#folder-template").find("#name-" + index).text(summary.name);
-                $("#folder-template").find("#type-" + index).text(summary.type);
-                $("#folder-template").find("#subfolders-" + index).text(summary.subfolders);
-                $("#folder-template").find("#documents-" + index).text(summary.documents);
+                $("#folder-template").find("#id-pbs-" + index).text(summary.prj_id);
+                $("#folder-template").find("#name-pbs-" + index).text(summary.name);
+                $("#folder-template").find("#type-pbs-" + index).text(summary.type);
+                $("#folder-template").find("#subfolders-pbs-" + index).text(summary.subfolders);
+                $("#folder-template").find("#documents-pbs-" + index).text(summary.documents);
             }
         });
     }
 
     var _showDetails = function (id) {
-        var index = id.replace("btn-showdetails-", "");
-        var hidden = $("#main").find("#hdn-objectid-" + index);
+        var index = id.replace("btn-showdetails-pbs-", "");
+        var hidden = $("#main").find("#hdn-objectid-pbs-" + index);
         var summaryRow = hidden.parents("div.well").find("div:nth-child(1)");
         var buttonRow = hidden.parents("div.well").find("div:nth-child(2)");
         var detailsRow = hidden.parents("div.well").find("div:nth-child(3)");
-        var prjId = summaryRow.find("#id-" + index).text();
-        var tree = detailsRow.find("#tree-" + index);
+        var prjId = summaryRow.find("#id-pbs-" + index).text();
+        var tree = detailsRow.find("#tree-pbs-" + index);
         if (tree.is(":empty")) {
             tree.fancytree({
+                checkbox: true,
+                selectMode: 3,
                 source: {
                     url: 'http://localhost/TestService/api/folders/' + prjId,
                     cache: false
-                }
+                },
+                cookieId: "fancytree-Cb" + index,
+                idPrefix: "fancytree-Cb" + index + "-"
+            });
+
+            detailsRow.find("#btn-selectall-pbs-" + index).click(function () {
+                tree.fancytree("getTree").visit(function (node) {
+                    node.setSelected(true);
+                });
+                return false;
+            });
+
+            detailsRow.find("#btn-deselectall-pbs-" + index).click(function () {
+                tree.fancytree("getTree").visit(function (node) {
+                    node.setSelected(false);
+                });
+                return false;
+            });
+
+            detailsRow.find("#btn-removeselected-pbs-" + index).click(function () {
+                var ftree = tree.fancytree("getTree");
+                var nodes = ftree.getSelectedNodes();
+                // todo: get this working properly
+                //nodes.forEach(function (node) {
+                //    while (node.hasChildren()) {
+                //        node.getFirstChild().remove();
+                //    }
+                //    node.remove();
+                //});
+                //return false;
             });
         }
         detailsRow.show();
-        var button = buttonRow.find("#btn-showdetails-" + index);
+        var button = buttonRow.find("#btn-showdetails-pbs-" + index);
         button.text("Hide Details");
         button.attr("onClick", "WorkSiteFolders.HideDetails(this.id); return false;");
     }
 
     var _hideDetails = function (id) {
-        var index = id.replace("btn-showdetails-", "");
-        var hidden = $("#main").find("#hdn-objectid-" + index);
+        var index = id.replace("btn-showdetails-pbs-", "");
+        var hidden = $("#main").find("#hdn-objectid-pbs-" + index);
         var buttonPanel = hidden.parents("div.well").find("div:nth-child(2)");
         var detailsPanel = hidden.parents("div.well").find("div:nth-child(3)");
         detailsPanel.hide();
-        var button = buttonPanel.find("#btn-showdetails-" + index);
+        var button = buttonPanel.find("#btn-showdetails-pbs-" + index);
         button.text("Show Details");
         button.attr("onClick", "WorkSiteFolders.ShowDetails(this.id); return false;");
     }
@@ -98,39 +129,34 @@ var WorkSiteFolders = function () {
             $("#main").append(function () {
                 var indexOld = 0;
                 var exists = false;
-                var currentFolders = $("#main").find("input[id^='hdn-objectid-']");
+                var currentFolders = $("#main").find("input[id^='hdn-objectid-pbs-']");
                 currentFolders.each(function () {
-                    var id = this.id.replace("hdn-objectid-", "");
+                    var id = this.id.replace("hdn-objectid-pbs-", "");
                     indexOld = Math.max(indexOld, parseInt(id));
                     if (e === this.value) exists = true;
                 });
 
                 if (!exists) {
                     var index = indexOld + 1;
-
-                    $("#folder-template").find("#id-" + indexOld).attr("id", "id-" + index);
-                    $("#folder-template").find("#name-" + indexOld).attr("id", "name-" + index);
-                    $("#folder-template").find("#type-" + indexOld).attr("id", "type-" + index);
-                    $("#folder-template").find("#subfolders-" + indexOld).attr("id", "subfolders-" + index);
-                    $("#folder-template").find("#documents-" + indexOld).attr("id", "documents-" + index);
-                    $("#folder-template").find("#hdn-objectid-" + indexOld).attr("id", "hdn-objectid-" + index);
-                    $("#folder-template").find("#btn-showdetails-" + indexOld).attr("id", "btn-showdetails-" + index);
-                    $("#folder-template").find("#btn-remove-" + indexOld).attr("id", "btn-remove-" + index);
-                    $("#folder-template").find("#tree-" + indexOld).attr("id", "tree-" + index);
+                    var template = $("#folder-template");
+                    template.find("[id$='pbs-" + indexOld + "']").each(function () {
+                        this.id = this.id.replace(indexOld, index);
+                    });
                     _loadSummary(index);
 
-                    $("#folder-template").find("#hdn-objectid-" + index).attr("value", e);
-                    $("#folder-template").find("#btn-showdetails-" + index).attr("onClick", "WorkSiteFolders.ShowDetails(this.id); return false;");
-                    $("#folder-template").find("#btn-remove-" + index).attr("onClick", "WorkSiteFolders.Remove(this.id); return false;");
-                    return $("#folder-template").html();
+                    template.find("#hdn-objectid-pbs-" + index).val(e);
+                    template.find("#btn-showdetails-pbs-" + index).attr("onclick", "WorkSiteFolders.ShowDetails(this.id); return false;");
+                    template.find("#btn-remove-pbs-" + index).attr("onclick", "WorkSiteFolders.Remove(this.id); return false;");
+
+                    return template.html();
                 }
             });
         });
     }
 
     var _remove = function (id) {
-        var index = id.replace("btn-remove-", "");
-        var panel = $("#main").find("#hdn-objectid-" + index).closest("div.container");
+        var index = id.replace("btn-remove-pbs-", "");
+        var panel = $("#main").find("#hdn-objectid-pbs-" + index).closest("div.container");
         panel.fadeOut("slow", function () {
             panel.remove();
         });
@@ -153,6 +179,10 @@ var WorkSiteFolders = function () {
 
         HideDetails: function (id) {
             _hideDetails(id);
+        },
+
+        RemoveSelected: function (id) {
+
         }
     }
 }();
