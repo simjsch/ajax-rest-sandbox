@@ -97,14 +97,13 @@ var WorkSiteFolders = function () {
             detailsRow.find("#btn-removeselected-pbs-" + index).click(function () {
                 var ftree = tree.fancytree("getTree");
                 var nodes = ftree.getSelectedNodes();
-                // todo: get this working properly
-                //nodes.forEach(function (node) {
-                //    while (node.hasChildren()) {
-                //        node.getFirstChild().remove();
-                //    }
-                //    node.remove();
-                //});
-                //return false;
+                nodes.forEach(function (node) {
+                    while (node.hasChildren()) {
+                        node.getFirstChild().moveTo(node.parent, "child");
+                    }
+                    node.remove();
+                });
+                return false;
             });
         }
         detailsRow.show();
