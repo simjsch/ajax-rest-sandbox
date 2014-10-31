@@ -40,13 +40,7 @@
     var _selectFolders = function () {
         var monikers = _activeX.GetFolders();
         if (monikers) {
-            var folders = monikers.split("***");
-
-            //$(folders).each(function () {
-                
-            //});
-
-            return folders;
+            return monikers.split("***");
         }
         return null;
     }

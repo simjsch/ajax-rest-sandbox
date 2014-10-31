@@ -4,6 +4,7 @@
 
 .panel {
     padding: 10px 10px 10px 10px;
+    margin-bottom: 0px;
 }
 
 .btn {
@@ -12,4 +13,9 @@
 
 div[id^="tree-buttons-"] {
     margin-top: 5px;
+}
+
+.row-margin {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }

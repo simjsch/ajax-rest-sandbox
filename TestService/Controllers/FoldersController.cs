@@ -8,9 +8,11 @@ using System.Web.Http;
 
 namespace TestService.Controllers
 {
+    [RoutePrefix("api/folders")]
     public class FoldersController : ApiController
     {
-        //// GET api/<controller>
+        [Route("")]
+        [HttpGet]
         public JToken Get()
         {
             return JArray.Parse(@"
@@ -33,7 +35,8 @@ namespace TestService.Controllers
             );
         }
 
-        // GET api/<controller>/5
+        [Route("{id}")]
+        [HttpGet]
         public JToken Get(int id)
         {
             return JArray.Parse(@"
@@ -56,19 +59,63 @@ namespace TestService.Controllers
             );
         }
 
-        // POST api/<controller>
-        public void Post([FromBody]string value)
+        [Route("{id}/summary")]
+        [HttpGet]
+        public JToken Summary(int id)
         {
+            return JObject.Parse(@"
+{
+    'id' : '!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!folder:ordinary,6922',
+    'name' : 'Ford Motor Company',
+    'prj_id' : '1080',
+    'type' : 'Workspace',
+    'subfolders' : '6',
+    'documents' : '27'
+}
+");
         }
 
-        // PUT api/<controller>/5
-        public void Put(int id, [FromBody]string value)
+        [Route("{id}/documents")]
+        [HttpGet]
+        public JToken Documents(int id)
         {
+            return JObject.Parse(@"
+{
+    'data' :
+    [
+        {
+            'docnum' : '445',
+            'version' : '1',
+            'description' : 'DIWUG_SharePoint_eMagazine6'
+        },
+        {
+            'docnum' : '444',
+            'version' : '1',
+            'description' : 'NLP test document'
+        },
+        {
+            'docnum' : '382',
+            'version' : '1',
+            'description' : 'Sprint 2 tasks for review'
+        },
+        {
+            'docnum' : '381',
+            'version' : '1',
+            'description' : 'SP2013Connect'
+        },
+        {
+            'docnum' : '380',
+            'version' : '1',
+            'description' : 'SiteScoped'
+        },
+        {
+            'docnum' : '379',
+            'version' : '1',
+            'description' : 'SharePoint 2013 Connect Tasks'
         }
-
-        // DELETE api/<controller>/5
-        public void Delete(int id)
-        {
+    ]
+}
+");
         }
     }
 }

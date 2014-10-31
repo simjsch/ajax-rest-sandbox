@@ -17,7 +17,7 @@ namespace TestService
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
-
+            GlobalConfiguration.Configure(c => c.MapHttpAttributeRoutes());
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
