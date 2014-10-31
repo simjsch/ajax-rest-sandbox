@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace TestService
+namespace GVA.WorkSite.WebService
 {
     public class RouteConfig
     {

@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication", "WebApplication\WebApplication.csproj", "{E9D1EC3D-0BEB-4F4C-8D9E-54C91C4FC48C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestService", "TestService\TestService.csproj", "{F3E00C6D-1A53-476F-9417-2021281FF2A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GVA.WorkSite.WebService", "TestService\GVA.WorkSite.WebService.csproj", "{F3E00C6D-1A53-476F-9417-2021281FF2A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

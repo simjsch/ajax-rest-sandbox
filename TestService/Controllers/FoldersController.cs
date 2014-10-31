@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
-namespace TestService.Controllers
+namespace GVA.WorkSite.WebService.Controllers
 {
     [RoutePrefix("api/folders")]
     public class FoldersController : ApiController

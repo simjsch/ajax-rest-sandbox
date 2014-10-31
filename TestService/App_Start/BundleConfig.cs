@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Optimization;
 
-namespace TestService
+namespace GVA.WorkSite.WebService
 {
     public class BundleConfig
     {

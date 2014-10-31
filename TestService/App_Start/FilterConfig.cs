@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Mvc;
 
-namespace TestService
+namespace GVA.WorkSite.WebService
 {
     public class FilterConfig
     {

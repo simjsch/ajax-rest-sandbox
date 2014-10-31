@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace TestService.Controllers
+namespace GVA.WorkSite.WebService.Controllers
 {
     public class HomeController : Controller
     {
