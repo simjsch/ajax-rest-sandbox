@@ -18,17 +18,16 @@ namespace GVA.WorkSite.WebService.Controllers
             return JArray.Parse(@"
 [
     {
-        'title' : 'Node 1',
-        'key' : '1'
+        ""id"" : ""1"",
+        ""text"" : ""Node 1""
     },
     {
-        'title' : 'Folder 2',
-        'key' : '2',
-        'folder' : true,
-        'children' :
+        ""id"" : ""2"",
+        ""text"" : ""Folder 2"",
+        ""children"" :
         [
-            { 'title' : 'Node 2.1', 'key' : '3' },
-            { 'title' : 'Node 2.2', 'key' : '4' }
+            { ""id"" : ""3"", ""text"" : ""Node 2.1"" },
+            { ""id"" : ""4"", ""text"" : ""Node 2.2"" }
         ]
     }
 ]"
@@ -42,17 +41,16 @@ namespace GVA.WorkSite.WebService.Controllers
             return JArray.Parse(@"
 [
     {
-        'title' : 'Node 1',
-        'key' : '1'
+        ""id"" : ""1"",
+        ""text"" : ""Node 1"",
     },
     {
-        'title' : 'Folder 2',
-        'key' : '2',
-        'folder' : true,
-        'children' :
+        ""id"" : ""2"",
+        ""text"" : ""Folder 2"",
+        ""children"" :
         [
-            { 'title' : 'Node 2.1', 'key' : '3' },
-            { 'title' : 'Node 2.2', 'key' : '4' }
+            { ""id"" : ""3"", ""text"" : ""Node 2.1"" },
+            { ""id"" : ""4"", ""text"" : ""Node 2.2"" }
         ]
     }
 ]"
@@ -65,12 +63,12 @@ namespace GVA.WorkSite.WebService.Controllers
         {
             return JObject.Parse(@"
 {
-    'id' : '!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!folder:ordinary,6922',
-    'name' : 'Ford Motor Company',
-    'prj_id' : '1080',
-    'type' : 'Workspace',
-    'subfolders' : '6',
-    'documents' : '27'
+    ""id"" : ""!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!folder:ordinary,6922"",
+    ""name"" : ""Ford Motor Company"",
+    ""prj_id"" : ""1080"",
+    ""type"" : ""Workspace"",
+    ""subfolders"" : ""6"",
+    ""documents"" : ""27""
 }
 ");
         }
@@ -79,42 +77,39 @@ namespace GVA.WorkSite.WebService.Controllers
         [HttpGet]
         public JToken Documents(int id)
         {
-            return JObject.Parse(@"
-{
-    'data' :
-    [
-        {
-            'docnum' : '445',
-            'version' : '1',
-            'description' : 'DIWUG_SharePoint_eMagazine6'
-        },
-        {
-            'docnum' : '444',
-            'version' : '1',
-            'description' : 'NLP test document'
-        },
-        {
-            'docnum' : '382',
-            'version' : '1',
-            'description' : 'Sprint 2 tasks for review'
-        },
-        {
-            'docnum' : '381',
-            'version' : '1',
-            'description' : 'SP2013Connect'
-        },
-        {
-            'docnum' : '380',
-            'version' : '1',
-            'description' : 'SiteScoped'
-        },
-        {
-            'docnum' : '379',
-            'version' : '1',
-            'description' : 'SharePoint 2013 Connect Tasks'
-        }
-    ]
-}
+            return JArray.Parse(@"
+[
+    {
+        ""docnum"" : ""445"",
+        ""version"" : ""1"",
+        ""description"" : ""DIWUG_SharePoint_eMagazine6""
+    },
+    {
+        ""docnum"" : ""444"",
+        ""version"" : ""1"",
+        ""description"" : ""NLP test document""
+    },
+    {
+        ""docnum"" : ""382"",
+        ""version"" : ""1"",
+        ""description"" : ""Sprint 2 tasks for review""
+    },
+    {
+        ""docnum"" : ""381"",
+        ""version"" : ""1"",
+        ""description"" : ""SP2013Connect""
+    },
+    {
+        ""docnum"" : ""380"",
+        ""version"" : ""1"",
+        ""description"" : ""SiteScoped""
+    },
+    {
+        ""docnum"" : ""379"",
+        ""version"" : ""1"",
+        ""description"" : ""SharePoint 2013 Connect Tasks""
+    }
+]
 ");
         }
     }
