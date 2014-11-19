@@ -1,72 +1,208 @@
 ﻿$(function () {
-    // ######
-    // todo: remove this
-    localStorage.clear();
-    // ######
-
-    // todo: get this working
-    //var $loading = $('#loading').hide();
-    //$(document)
-    //    .ajaxStart(function () {
-    //        $loading.show();
-    //    })
-    //    .ajaxStop(function () {
-    //        $loading.hide();
-    //    });
-
     WorkSiteBrowser.Init();
 
     $("#browse").click(function () {
         var folders = WorkSiteBrowser.SelectFolders();
 
         if (folders) {
-            if (0 === $("#folder-template").length) {
-                var path = '//' + location.host + location.pathname.substring(0, location.pathname.lastIndexOf("/")) + "/FolderTemplate.html";
-
-                $.ajax({
-                    async: false,
-                    type: 'GET',
-                    url: path,
-                    success: function (data) {
-                        $(data).appendTo("body");
-                    }
-                });
-            }
-            WorkSiteFolders.Insert(folders);
+            FolderManager.Init(folders)
+            FolderManager.Render();
         }
     });
 });
 
-//var WorkSiteFolder = function () {
-//    var _id = 0;
+var WorkSiteFolder = (function () {
+    // *** private properties
+    var _summaryUrl = "http://localhost/TestService/api/folders/5/summary";
+    var _treeUrl = "http://localhost/TestService/api/folders/";
 
-//    return {
-//        Init: function (options) {
-//            _insert(folders);
-//        },
+    // *** public properties
+    this.Id;
+    this.ParentId;
 
-//        HideDetails: function (id) {
-//            _hideDetails(id);
-//        }
-//    }
-//}();
+    // summary
+    this.Name;
+    this.Type;
+    this.SubFolderCount;
+    this.DocumentCount;
+
+    // template
+    this.Template;
+    this.SummaryRowRef;
+    this.ButtonRowRef;
+    this.DetailsRowRef;
+    this.TreeRef;
+    this.GridRef;
+
+    // data
+    this.TreeData;
+
+    // *** constructor
+    function WorkSiteFolder(id, parentId) {
+        this.Id = id;
+        this.ParentId = parentId;
+        this.Template = $("#folder-template").clone();
+    }
+
+    // *** private methods
+    function _getTemplate() {
+        this.Template.find("#id-pbs-0").text(this.Id);
+        this.Template.find("#name-pbs-0").text(this.Name);
+        this.Template.find("#type-pbs-0").text(this.Type);
+        this.Template.find("#subfolders-pbs-0").text(this.SubFolderCount);
+        this.Template.find("#documents-pbs-0").text(this.DocumentCount);
+        this.Template.find("#hdn-objectid-pbs-0").val(this.Id);
+        this.Template.find("#btn-showdetails-pbs-0").attr("onclick", "FolderManager.ShowDetails(this.id.replace('btn-showdetails-pbs-', '')); return false;");
+        this.Template.find("#btn-remove-pbs-0").attr("onclick", "FolderManager.Remove(this.id.replace('btn-remove-pbs-', '')); return false;");
+        var folder = this;
+        this.Template.find("[id$='pbs-0']").each(function () {
+            this.id = this.id.replace(0, folder.Id);
+        });
+    }
+
+    function _renderTree() {
+        this.TreeRef.on("activate_node.jstree", function (e, data) {
+            var nodeId = data.node.id;
+            _loadGrid(this.GridRef, nodeId, this.Id, this.DetailsRowRef)
+        }).jstree({
+            "core": {
+                "check_callback": true,
+                "data": this.TreeData,
+                "themes": { name: "proton" }
+            },
+            "plugins": ["checkbox"]
+        });
+
+        this.DetailsRowRef.find("#btn-tree-selectall-pbs-" + this.Id).click(function () {
+            this.TreeRef.jstree("check_all");
+            return false;
+        });
+
+        this.DetailsRowRef.find("#btn-tree-deselectall-pbs-" + this.Id).click(function () {
+            this.TreeRef.jstree("uncheck_all");
+            return false;
+        });
+
+        this.DetailsRowRef.find("#btn-tree-removeselected-pbs-" + this.Id).click(function () {
+            var nodes = this.TreeRef.jstree("get_checked");
+            this.TreeRef.jstree("delete_node", nodes);
+            //localStorage["tree-" + treeId] = JSON.stringify(tree.jstree("get_json"));
+            this.TreeData = this.TreeRef.jstree("get_json");
+            return false;
+        });
+
+    }
+
+    function _initTree() {
+        if (!this.TreeData) {
+            var folder = this;
+            $.ajax({
+                url: _treeUrl + folder.Id,
+                type: "get",
+                dataType: "json",
+                cache: false,
+                success: function (treeData) {
+                    folder.TreeData = treeData;
+                    _renderTree.call(folder);
+                }
+            });
+
+        } else {
+            _renderTree.call(folder);
+        }
+    }
+
+    // *** public methods
+    WorkSiteFolder.prototype.GetTemplate = function () {
+        var folder = this;
+        $.ajax({
+            async: false,
+            type: "get",
+            url: _summaryUrl,
+            dataType: "json",
+            success: function (summary) {
+                folder.Name = summary.name;
+                folder.Type = summary.type;
+                folder.SubFolderCount = summary.subfolders;
+                folder.DocumentCount = summary.documents;
+                _getTemplate.call(folder);
+            }
+        });
+        return this.Template.html();
+    }
+
+    WorkSiteFolder.prototype.ShowDetails = function()
+    {
+        var hidden = $("#main").find("#hdn-objectid-pbs-" + this.Id);
+        this.SummaryRowRef = hidden.parents("div.well").find("div:nth-child(1)");
+        this.ButtonRowRef = hidden.parents("div.well").find("div:nth-child(2)");
+        this.DetailsRowRef = hidden.parents("div.well").find("div:nth-child(3)");
+        this.TreeRef = this.DetailsRowRef.find("#tree-pbs-" + this.Id);
+        this.GridRef = this.DetailsRowRef.find("#grid-pbs-" + this.Id);
+
+        // todo: lazy loading
+        // todo: load to/from local storage
+        if (this.TreeRef.is(":empty")) {
+            _initTree.call(this);
+        }
+        this.DetailsRowRef.slideDown("fast");
+        var button = this.ButtonRowRef.find("#btn-showdetails-pbs-" + this.Id);
+        button.text("Hide Details");
+        button.attr("onClick", "FolderManager.HideDetails(this.id.replace('btn-showdetails-pbs-', '')); return false;");
+    }
+
+    return WorkSiteFolder;
+})();
+
+var FolderManager = function () {
+    var _rootFolders = [];
+
+    var _init = function (folders) {
+        $.each(folders, function (i, e) {
+            var id = e.split(":")[7];
+            _rootFolders[id] = new WorkSiteFolder(id, null);
+        });
+    }
+
+    var _render = function () {
+        for (var folderId in _rootFolders) {
+            var folder = _rootFolders[folderId];
+            var exists = false;
+            var folders = $("#main").find("input[id^='hdn-objectid-pbs-']");
+            folders.each(function () {
+                if (folderId === this.value) exists = true;
+            });
+            if (!exists) $("#main").append(folder.GetTemplate());
+        }
+    }
+
+    var _showDetails = function (folderId) {
+        _rootFolders[folderId].ShowDetails();
+    }
+
+
+    return {
+        Init: function (folders) {
+            _init(folders);
+        },
+
+        Render: function () {
+            _render();
+        },
+
+        ShowDetails: function (folderId) {
+            _showDetails(folderId);
+        },
+
+        Remove: function (folderId) {
+
+
+        }
+
+    }
+}();
 
 var WorkSiteFolders = function () {
-    /* todo: refactor all of this so it's sort of oo -
-    [
-        folder: {
-            prjId : "",
-            name : "",
-            type : "",
-            subfolders : [
-                subfolder : {
-                    {},
-                    {}
-                }
-            ]
-        }
-    ]
-    */
     var _loadSummary = function (index) {
         var path = "http://localhost/TestService/api/folders/5/summary";
 
