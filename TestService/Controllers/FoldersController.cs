@@ -19,15 +19,17 @@ namespace GVA.WorkSite.WebService.Controllers
 [
     {
         ""id"" : ""1"",
-        ""text"" : ""Node 1""
+        ""text"" : ""Node 1"",
+        ""docsLoaded"" : ""0""
     },
     {
         ""id"" : ""2"",
         ""text"" : ""Folder 2"",
+        ""docsLoaded"" : ""0"",
         ""children"" :
         [
-            { ""id"" : ""3"", ""text"" : ""Node 2.1"" },
-            { ""id"" : ""4"", ""text"" : ""Node 2.2"" }
+            { ""id"" : ""3"", ""text"" : ""Node 2.1"", ""docsLoaded"" : ""0"" },
+            { ""id"" : ""4"", ""text"" : ""Node 2.2"", ""docsLoaded"" : ""0"" }
         ]
     }
 ]"
@@ -43,14 +45,16 @@ namespace GVA.WorkSite.WebService.Controllers
     {
         ""id"" : ""1"",
         ""text"" : ""Node 1"",
+        ""docsLoaded"" : ""0""
     },
     {
         ""id"" : ""2"",
         ""text"" : ""Folder 2"",
+        ""docsLoaded"" : ""0"",
         ""children"" :
         [
-            { ""id"" : ""3"", ""text"" : ""Node 2.1"" },
-            { ""id"" : ""4"", ""text"" : ""Node 2.2"" }
+            { ""id"" : ""3"", ""text"" : ""Node 2.1"", ""docsLoaded"" : ""0"" },
+            { ""id"" : ""4"", ""text"" : ""Node 2.2"", ""docsLoaded"" : ""0"" }
         ]
     }
 ]"

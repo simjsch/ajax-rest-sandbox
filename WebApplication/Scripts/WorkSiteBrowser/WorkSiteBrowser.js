@@ -2,7 +2,7 @@
     var _activeX;
 
     var _init = function() {
-        _activeX = new ActiveXObject('PhoenixBs.SharepointUtils.Worksite');
+        //_activeX = new ActiveXObject('PhoenixBs.SharepointUtils.Worksite');
     }
 
     var _select = function() {
@@ -38,11 +38,13 @@
     }
 
     var _selectFolders = function () {
-        var monikers = _activeX.GetFolders();
-        if (monikers) {
-            return monikers.split("***");
-        }
-        return null;
+        //var monikers = _activeX.GetFolders();
+        //if (monikers) {
+        //    return monikers.split("***");
+        //} else {
+            return "!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:4628:***!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:562:***!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:1535:***!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:5541:".split("***");
+        //}
+        //return null;
     }
 
     return {
