@@ -104,6 +104,7 @@ var WorkSiteFolder = (function () {
                     });
 
                     folder.DetailsRowRef.find("#btn-grid-removeselected-pbs-" + folder.Id).on("click", function () {
+                        // todo: fix this, isn't working 100%
                         dt.row(".active").remove().draw(false);
                         folder.ActiveNodeRef = dt.data();
                         return false;
@@ -124,14 +125,14 @@ var WorkSiteFolder = (function () {
                 folder.GridRef.remove();
                 // todo: do this better
                 parent.append(
-                    '<table id="grid-pbs-' + folder.Id + '" class="table table-striped table-bordered">' +
-                    '   <thead>' +
-                    '       <tr>' +
-                    '           <th>DocNum</th>' +
-                    '           <th>Description</th>' +
-                    '       </tr>' +
-                    '   </thead>' +
-                    '</table>'
+'<table id="grid-pbs-' + folder.Id + '" class="table table-striped table-bordered">' +
+'   <thead>' +
+'       <tr>' +
+'           <th>DocNum</th>' +
+'           <th>Description</th>' +
+'       </tr>' +
+'   </thead>' +
+'</table>'
                 );
                 folder.GridRef = folder.DetailsRowRef.find("#grid-pbs-" + folder.Id);
                 _showGrid.call(folder);
