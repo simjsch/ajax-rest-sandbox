@@ -13,11 +13,15 @@
 
 var WorkSiteFolder = (function () {
     // *** private properties
-    var _serviceUrl = "http://localhost/TestService/api/folders/";
-
+    var _serviceUrl = "http://localhost:666/FolderMapperService/api/folders/";
+    var _dmsUsername = "sschoch";
+    var _dmsPassword = "Ph0en1xbs";
+    
     // *** public properties
     this.Id;
     this.ParentId;
+    this.Server;
+    this.Database;
 
     // summary
     this.Name;
@@ -38,9 +42,12 @@ var WorkSiteFolder = (function () {
     this.ActiveNodeRef;
 
     // *** constructor
-    function WorkSiteFolder(id, parentId) {
+    function WorkSiteFolder(id, parentId, server, database, type) {
         this.Id = id;
         this.ParentId = parentId;
+        this.Server = server;
+        this.Database = database;
+        this.Type = type;
         this.Template = $("#folder-template").clone();
     }
 
@@ -104,7 +111,6 @@ var WorkSiteFolder = (function () {
                     });
 
                     folder.DetailsRowRef.find("#btn-grid-removeselected-pbs-" + folder.Id).on("click", function () {
-                        // todo: fix this, isn't working 100%
                         dt.row(".active").remove().draw(false);
                         folder.ActiveNodeRef = dt.data();
                         return false;
@@ -123,7 +129,7 @@ var WorkSiteFolder = (function () {
                 folder.GridRef.DataTable().destroy();
                 var parent = folder.GridRef.parent();
                 folder.GridRef.remove();
-                // todo: do this better
+                // todo: refactor this
                 parent.append(
 '<table id="grid-pbs-' + folder.Id + '" class="table table-striped table-bordered">' +
 '   <thead>' +
@@ -149,7 +155,8 @@ var WorkSiteFolder = (function () {
         })[0];
         if (!this.ActiveNodeRef) {
             $.ajax({
-                url: _serviceUrl + nodeId + "/documents",
+                url: _serviceUrl + folder.Database + "/" + nodeId + "/documents",
+                headers: { "dmsServer" : folder.Server, "dmsUsername" : _dmsUsername, "dmsPassword" : _dmsPassword },
                 type: "get",
                 dataType: "json",
                 cache: false,
@@ -199,7 +206,8 @@ var WorkSiteFolder = (function () {
         var folder = this;
         if (!this.TreeData) {
             $.ajax({
-                url: _serviceUrl + folder.Id,
+                url: _serviceUrl + folder.Database + "/" + folder.Id,
+                headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
                 type: "get",
                 dataType: "json",
                 cache: false,
@@ -218,9 +226,11 @@ var WorkSiteFolder = (function () {
     WorkSiteFolder.prototype.GetTemplate = function () {
         var folder = this;
         $.ajax({
+            // todo: remove Type from here once the core library is updated
+            url: _serviceUrl + folder.Database + "/" + folder.Id + "/" + folder.Type + "/summary",
+            headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
             async: false,
             type: "get",
-            url: _serviceUrl + this.Id + "/summary",
             dataType: "json",
             success: function (summary) {
                 folder.Name = summary.name;
@@ -277,8 +287,25 @@ var FolderManager = function () {
 
     var _init = function (folders) {
         $.each(folders, function (i, e) {
-            var id = e.split(":")[7];
-            _rootFolders[id] = new WorkSiteFolder(id, null);
+            // workspace[2] = session:xxx
+            // workspace[3] = database:xxx
+            // workspace[4] = page:xxx
+            // folder[2] = session:xxx
+            // folder[3] = database:xxx
+            // folder[4] = folder:xxx,yyy
+            var tokens = e.split("!");
+            var server = tokens[2].split(":")[1];
+            var database = tokens[3].split(":")[1];
+            var type = tokens[4].split(":")[0];
+            var id = 0;
+
+            if ("page" === type) {
+                id = tokens[4].split(":")[1];
+            }
+            else if ("folder" === type) {
+                id = tokens[4].split(":")[1].split(",")[1];
+            }
+            _rootFolders[id] = new WorkSiteFolder(id, null, server, database, type);
         });
     }
 
