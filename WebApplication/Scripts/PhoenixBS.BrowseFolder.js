@@ -6,7 +6,7 @@
 
         if (folders) {
             FolderManager.Init(folders)
-            FolderManager.Render();
+            FolderManager.Insert();
         }
     });
 });
@@ -223,24 +223,41 @@ var WorkSiteFolder = (function () {
     }
 
     // *** public methods
-    WorkSiteFolder.prototype.GetTemplate = function () {
-        var folder = this;
-        $.ajax({
-            // todo: remove Type from here once the core library is updated
-            url: _serviceUrl + folder.Database + "/" + folder.Id + "/" + folder.Type + "/summary",
-            headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
-            async: false,
-            type: "get",
-            dataType: "json",
-            success: function (summary) {
-                folder.Name = summary.name;
-                folder.Type = summary.type;
-                folder.SubFolderCount = summary.subfolders;
-                folder.DocumentCount = summary.documents;
-                _getTemplate.call(folder);
-            }
-        });
-        return this.Template.html();
+    WorkSiteFolder.prototype.Insert = function () {
+        var hidden = $("#main").find("#hdn-objectid-pbs-" + this.Id);
+        if (!hidden.length) {
+            var folder = this;
+
+            var placeHolder = $("#folder-placeholder").clone();
+            placeHolder.find("[id='folder-placeholder-0']").each(function () {
+                this.id = this.id.replace(0, folder.Id);
+            });
+
+            $("#main").append(placeHolder.html());
+            $.ajax({
+                // todo: remove Type from here once the core library is updated
+                url: _serviceUrl + folder.Database + "/" + folder.Id + "/" + folder.Type + "/summary",
+                headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
+                async: true,
+                type: "get",
+                dataType: "json",
+                success: function (summary) {
+                    folder.Name = summary.name;
+                    folder.Type = summary.type;
+                    folder.SubFolderCount = summary.subfolders;
+                    folder.DocumentCount = summary.documents;
+                    _getTemplate.call(folder);
+                    var placeHolderRef = $("#folder-placeholder-" + folder.Id);
+                    placeHolderRef.fadeOut("fast", function () {
+                        placeHolderRef.replaceWith(folder.Template.html());
+                    })
+                },
+                error: function () {
+                    var placeHolderRef = $("#folder-placeholder-" + folder.Id);
+                    placeHolderRef.find("div.panel").replaceWith('<div class="alert alert-danger">An error occurred.</div>');
+                }
+            });
+        }
     }
 
     WorkSiteFolder.prototype.ShowDetails = function()
@@ -287,37 +304,28 @@ var FolderManager = function () {
 
     var _init = function (folders) {
         $.each(folders, function (i, e) {
-            // workspace[2] = session:xxx
-            // workspace[3] = database:xxx
-            // workspace[4] = page:xxx
-            // folder[2] = session:xxx
-            // folder[3] = database:xxx
-            // folder[4] = folder:xxx,yyy
             var tokens = e.split("!");
             var server = tokens[2].split(":")[1];
             var database = tokens[3].split(":")[1];
-            var type = tokens[4].split(":")[0];
+            var type = tokens[4].split(":")[0].toLowerCase();
             var id = 0;
 
-            if ("page" === type) {
+            if ("page" === type || "tab" === type)
+            {
                 id = tokens[4].split(":")[1];
             }
-            else if ("folder" === type) {
+            else //if ("folder" === type)
+            {
                 id = tokens[4].split(":")[1].split(",")[1];
             }
             _rootFolders[id] = new WorkSiteFolder(id, null, server, database, type);
         });
     }
 
-    var _render = function () {
+    var _insert = function () {
         for (var folderId in _rootFolders) {
             var folder = _rootFolders[folderId];
-            var exists = false;
-            var folders = $("#main").find("input[id^='hdn-objectid-pbs-']");
-            folders.each(function () {
-                if (folderId === this.value) exists = true;
-            });
-            if (!exists) $("#main").append(folder.GetTemplate());
+            folder.Insert();
         }
     }
 
@@ -334,8 +342,8 @@ var FolderManager = function () {
             _init(folders);
         },
 
-        Render: function () {
-            _render();
+        Insert: function () {
+            _insert();
         },
 
         ShowDetails: function (folderId) {
@@ -348,6 +356,7 @@ var FolderManager = function () {
 
         Remove: function (folderId) {
             _rootFolders[folderId].Remove();
+            delete _rootFolders[folderId];
         }
     }
 }();
