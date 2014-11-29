@@ -16,7 +16,7 @@ var WorkSiteFolder = (function () {
     var _serviceUrl = "http://localhost:666/FolderMapperService/api/folders/";
     var _dmsUsername = "sschoch";
     var _dmsPassword = "Ph0en1xbs";
-    
+
     // *** public properties
     this.Id;
     this.ParentId;
@@ -52,69 +52,77 @@ var WorkSiteFolder = (function () {
     }
 
     // *** private methods
-    function _getTemplate() {
-        this.Template.find("#id-pbs-0").text(this.Id);
-        this.Template.find("#name-pbs-0").text(this.Name);
-        this.Template.find("#type-pbs-0").text(this.Type);
-        this.Template.find("#subfolders-pbs-0").text(this.SubFolderCount);
-        this.Template.find("#documents-pbs-0").text(this.DocumentCount);
-        this.Template.find("#hdn-objectid-pbs-0").val(this.Id);
-        this.Template.find("#btn-showdetails-pbs-0").attr("onclick", "FolderManager.ShowDetails(this.id.replace('btn-showdetails-pbs-', '')); return false;");
-        this.Template.find("#btn-remove-pbs-0").attr("onclick", "FolderManager.Remove(this.id.replace('btn-remove-pbs-', '')); return false;");
+    function _databind() {
         var folder = this;
-        this.Template.find("[id$='pbs-0']").each(function () {
+        folder.Template.find("#id-pbs-0").text(folder.Id);
+        folder.Template.find("#name-pbs-0").text(folder.Name);
+        folder.Template.find("#type-pbs-0").text(folder.Type);
+        folder.Template.find("#subfolders-pbs-0").text(folder.SubFolderCount);
+        folder.Template.find("#documents-pbs-0").text(folder.DocumentCount);
+        folder.Template.find("#hdn-objectid-pbs-0").val(folder.Id);
+        folder.Template.find("#btn-showdetails-pbs-0").attr("onclick", "FolderManager.ShowDetails(this.id.replace('btn-showdetails-pbs-', '')); return false;");
+        folder.Template.find("#btn-remove-pbs-0").attr("onclick", "FolderManager.Remove(this.id.replace('btn-remove-pbs-', '')); return false;");
+        folder.Template.find("[id$='pbs-0']").each(function () {
             this.id = this.id.replace(0, folder.Id);
         });
     }
 
     function _showGrid() {
         var folder = this;
-        var gridPanel = this.GridRef.closest("div.panel");
+        var gridPanel = folder.DetailsRowRef.find("#grid-panel-pbs-" + folder.Id);
 
-        var dt = this.GridRef.DataTable({
-            data: this.ActiveNodeRef,
+        folder.GridRef.dataTable({
+            data: folder.ActiveNodeRef.documents,
             columns:
             [
                 { "data": "docnum" },
                 { "data": "description" }
             ],
+            pagingType : "simple",
             initComplete: function () {
-                gridPanel.slideDown("fast", function () {
-                    var lastIdx = null;
-                    folder.GridRef.on("mouseover", "td", function () {
+                var gridPlaceholder = folder.DetailsRowRef.find("#grid-placeholder-pbs-" + folder.Id);
+                gridPlaceholder.fadeOut("fast", function () {
+                    gridPanel.show();
+                });
+
+                var dt = folder.GridRef.dataTable().api();
+
+                var lastIdx = null;
+                folder.GridRef.on("mouseover", "td", function () {
+                    if (dt.cell(this).index()) {
                         var colIdx = dt.cell(this).index().column;
 
                         if (colIdx !== lastIdx) {
                             $(dt.cells().nodes()).removeClass("highlight");
                             $(dt.column(colIdx).nodes()).addClass("highlight");
                         }
-                    })
-                    .on("mouseleave", function () {
-                        $(dt.cells().nodes()).removeClass("highlight");
-                    })
-                    .on("click", "tr", function () {
-                        $(this).toggleClass("active");
-                    })
+                    }
+                })
+                .on("mouseleave", function () {
+                    $(dt.cells().nodes()).removeClass("highlight");
+                })
+                .on("click", "tr", function () {
+                    $(this).toggleClass("active");
+                })
 
-                    folder.DetailsRowRef.find("#btn-grid-selectall-pbs-" + folder.Id).on("click", function () {
-                        folder.GridRef.find("tr").each(function () {
-                            $(this).addClass("active");
-                        });
-                        return false;
+                folder.DetailsRowRef.find("#btn-grid-selectall-pbs-" + folder.Id).on("click", function () {
+                    folder.GridRef.find("tr").each(function () {
+                        $(this).addClass("active");
                     });
+                    return false;
+                });
 
-                    folder.DetailsRowRef.find("#btn-grid-deselectall-pbs-" + folder.Id).on("click", function () {
-                        folder.GridRef.find("tr").each(function () {
-                            $(this).removeClass("active");
-                        });
-                        return false;
+                folder.DetailsRowRef.find("#btn-grid-deselectall-pbs-" + folder.Id).on("click", function () {
+                    folder.GridRef.find("tr").each(function () {
+                        $(this).removeClass("active");
                     });
+                    return false;
+                });
 
-                    folder.DetailsRowRef.find("#btn-grid-removeselected-pbs-" + folder.Id).on("click", function () {
-                        dt.row(".active").remove().draw(false);
-                        folder.ActiveNodeRef = dt.data();
-                        return false;
-                    });
+                folder.DetailsRowRef.find("#btn-grid-removeselected-pbs-" + folder.Id).on("click", function () {
+                    dt.row(".active").remove().draw(false);
+                    folder.ActiveNodeRef.documents = dt.data();
+                    return false;
                 });
             }
         });
@@ -122,11 +130,12 @@ var WorkSiteFolder = (function () {
 
     function _renderGrid() {
         var folder = this;
-        var gridPanel = this.GridRef.closest("div.panel");
+        var gridPanel = folder.DetailsRowRef.find("#grid-panel-pbs-" + folder.Id);
 
-        if ($.fn.dataTable.isDataTable(this.GridRef)) {
-            gridPanel.slideUp("fast", function () {
-                folder.GridRef.DataTable().destroy();
+        if ($.fn.dataTable.isDataTable(folder.GridRef)) {
+            var gridPlaceholder = folder.DetailsRowRef.find("#grid-placeholder-pbs-" + folder.Id);
+            gridPanel.fadeOut("fast", function () {
+                folder.GridRef.dataTable().fnDestroy();
                 var parent = folder.GridRef.parent();
                 folder.GridRef.remove();
                 // todo: refactor this
@@ -141,30 +150,62 @@ var WorkSiteFolder = (function () {
 '</table>'
                 );
                 folder.GridRef = folder.DetailsRowRef.find("#grid-pbs-" + folder.Id);
+                gridPlaceholder.show();
                 _showGrid.call(folder);
             });
         } else {
             _showGrid.call(folder);
         }
     }
-    
+
+    function _findNode(tree, nodeId) {
+        var result;
+        var node = $.grep(tree, function (item) {
+            if (nodeId != item.id) {
+                if (Array === item.children.constructor) {
+                    var node2 = _findNode(item.children, nodeId);
+                    if (node2) {
+                        result = node2;
+                    }
+                }
+            } else {
+                return true;
+            }
+            return false;
+        })[0]
+        if (node) {
+            result = node;
+        }
+        return result;
+    }
+
     function _initGrid(nodeId) {
         var folder = this;
-        this.ActiveNodeRef = this.TreeData.filter(function (item) {
-            return (item.id === nodeId && item.docsLoaded === 1);
-        })[0];
-        if (!this.ActiveNodeRef) {
-            $.ajax({
-                url: _serviceUrl + folder.Database + "/" + nodeId + "/documents",
-                headers: { "dmsServer" : folder.Server, "dmsUsername" : _dmsUsername, "dmsPassword" : _dmsPassword },
-                type: "get",
-                dataType: "json",
-                cache: false,
-                success: function (gridData) {
-                    folder.ActiveNodeRef = gridData;
-                    _renderGrid.call(folder);
-                }
-            });
+
+        if (nodeId == folder.TreeData.id) {
+            folder.ActiveNodeRef = folder.TreeData;
+        } else {
+            folder.ActiveNodeRef = $.grep(folder.TreeData.children, function (item) {
+                return nodeId == item.id;
+            })[0];
+        }
+
+        if (Array !== folder.ActiveNodeRef.documents.constructor) {
+            if (true === folder.ActiveNodeRef.documents) {
+                $.ajax({
+                    url: _serviceUrl + folder.Database + "/" + nodeId + "/documents",
+                    headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
+                    type: "get",
+                    dataType: "json",
+                    cache: false,
+                    success: function (documents) {
+                        folder.ActiveNodeRef.documents = documents;
+                        _renderGrid.call(folder);
+                    }
+                });
+            } else {
+                _renderGrid.call(folder);
+            }
         } else {
             _renderGrid.call(folder);
         }
@@ -172,32 +213,78 @@ var WorkSiteFolder = (function () {
 
     function _renderTree() {
         var folder = this;
-        this.TreeRef.on("activate_node.jstree", function (e, data) {
+        folder.TreeRef.on("activate_node.jstree", function (e, data) {
             var nodeId = data.node.id;
             _initGrid.call(folder, nodeId)
-        }).jstree({
+        })
+        .jstree({
             "core": {
                 "check_callback": true,
-                "data": this.TreeData,
+                "data": function (node, cb) {
+                    if ("#" === node.id) {
+                        // root node
+                        var treeData = $.extend(true, {}, folder.TreeData);
+                        cb.call(this, treeData);
+                    } else {
+                        // leaf node
+                        var treeData = null;
+                        //var expandedNode = $.grep(folder.TreeData.children, function (item) {
+                        //    return node.id == item.id;
+                        //})[0];
+                        var expandedNode = _findNode(folder.TreeData.children, node.id);
+
+                        if (Array === expandedNode.children.constructor) {
+                            treeData = $.extend(true, {}, expandedNode);
+                            cb.call(this, treeData);
+                        } else {
+                            $.ajax({
+                                url: _serviceUrl + folder.Database + "/" + node.id + "/folder/tree",
+                                headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
+                                type: "get",
+                                dataType: "json",
+                                cache: false,
+                                success: function (result) {
+                                    expandedNode.children = result.children;
+                                    treeData = $.extend(true, {}, expandedNode);
+                                    cb.call(this, treeData);
+                                }
+                            });
+                        }
+                    }
+                },
                 "themes": { name: "proton" }
-            },
-            "plugins": ["checkbox"]
+            }
+            //,
+            //"checkbox": { "whole_node": true },
+            //"plugins": ["checkbox"]
+        })
+        .bind("ready.jstree", function (e, data) {
+            var placeHolder = folder.DetailsRowRef.find("#tree-placeholder-pbs-" + folder.Id);
+            var treeRow = folder.DetailsRowRef.find("#tree-row-pbs-" + folder.Id);
+            placeHolder.fadeOut("fast", function () {
+                treeRow.show();
+            });
         });
 
         this.DetailsRowRef.find("#btn-tree-selectall-pbs-" + this.Id).click(function () {
-            folder.TreeRef.jstree("check_all");
+            //folder.TreeRef.jstree("check_all");
+            folder.TreeRef.jstree("select_all");
             return false;
         });
 
         this.DetailsRowRef.find("#btn-tree-deselectall-pbs-" + this.Id).click(function () {
-            folder.TreeRef.jstree("uncheck_all");
+            //folder.TreeRef.jstree("uncheck_all");
+            folder.TreeRef.jstree("deselect_all");
             return false;
         });
 
         this.DetailsRowRef.find("#btn-tree-removeselected-pbs-" + this.Id).click(function () {
-            var nodes = folder.TreeRef.jstree("get_checked");
+            //var nodes = folder.TreeRef.jstree("get_checked");
+            //folder.TreeRef.jstree("delete_node", nodes);
+            var nodes = folder.TreeRef.jstree("get_selected");
             folder.TreeRef.jstree("delete_node", nodes);
-            folder.TreeData = folder.TreeRef.jstree("get_json");
+            // todo
+            //folder.TreeData = folder.TreeRef.jstree("get_json");
             return false;
         });
     }
@@ -206,7 +293,7 @@ var WorkSiteFolder = (function () {
         var folder = this;
         if (!this.TreeData) {
             $.ajax({
-                url: _serviceUrl + folder.Database + "/" + folder.Id,
+                url: _serviceUrl + folder.Database + "/" + folder.Id + "/" + folder.Type + "/tree",
                 headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
                 type: "get",
                 dataType: "json",
@@ -216,7 +303,6 @@ var WorkSiteFolder = (function () {
                     _renderTree.call(folder);
                 }
             });
-
         } else {
             _renderTree.call(folder);
         }
@@ -246,7 +332,7 @@ var WorkSiteFolder = (function () {
                     folder.Type = summary.type;
                     folder.SubFolderCount = summary.subfolders;
                     folder.DocumentCount = summary.documents;
-                    _getTemplate.call(folder);
+                    _databind.call(folder);
                     var placeHolderRef = $("#folder-placeholder-" + folder.Id);
                     placeHolderRef.fadeOut("fast", function () {
                         placeHolderRef.replaceWith(folder.Template.html());
@@ -260,8 +346,7 @@ var WorkSiteFolder = (function () {
         }
     }
 
-    WorkSiteFolder.prototype.ShowDetails = function()
-    {
+    WorkSiteFolder.prototype.ShowDetails = function () {
         var hidden = $("#main").find("#hdn-objectid-pbs-" + this.Id);
         this.SummaryRowRef = hidden.parents("div.well").find("div:nth-child(1)");
         this.ButtonRowRef = hidden.parents("div.well").find("div:nth-child(2)");
@@ -286,8 +371,7 @@ var WorkSiteFolder = (function () {
         button.attr("onClick", "FolderManager.ShowDetails(this.id.replace('btn-showdetails-pbs-', '')); return false;");
     }
 
-    WorkSiteFolder.prototype.Remove = function ()
-    {
+    WorkSiteFolder.prototype.Remove = function () {
         var panel = $("#main").find("#hdn-objectid-pbs-" + this.Id).closest("div.container").parent();
         panel.fadeOut("fast", function () {
             panel.remove();
@@ -310,13 +394,18 @@ var FolderManager = function () {
             var type = tokens[4].split(":")[0].toLowerCase();
             var id = 0;
 
-            if ("page" === type || "tab" === type)
-            {
+            if ("page" === type) {
                 id = tokens[4].split(":")[1];
+                type = "Workspace";
+            }
+            else if ("tab" === type) {
+                id = tokens[4].split(":")[1];
+                type = "Tab";
             }
             else //if ("folder" === type)
             {
                 id = tokens[4].split(":")[1].split(",")[1];
+                type = "Folder";
             }
             _rootFolders[id] = new WorkSiteFolder(id, null, server, database, type);
         });
@@ -350,7 +439,7 @@ var FolderManager = function () {
             _showDetails(folderId);
         },
 
-        HideDetails: function(folderId) {
+        HideDetails: function (folderId) {
             _hideDetails(folderId);
         },
 
