@@ -42,9 +42,12 @@
         if (monikers) {
             return monikers.split("***");
         }
-        //else {
-            return "!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:4628:***!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:562:***!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:1535:***!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:5541:".split("***");
-        //}
+        //return [
+        //    "!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:4628:",
+        //    "!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:562:",
+        //    "!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:1535:",
+        //    "!nrtdms:0:!session:LONDMS01:!database:WORKSITE:!page:5541:"
+        //];
         return null;
     }
 
