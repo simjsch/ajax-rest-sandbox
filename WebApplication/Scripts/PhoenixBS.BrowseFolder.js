@@ -12,7 +12,10 @@
     });
 
     $("#save").click(function () {
-        FolderManager.Save();
+        $("#modal-save").modal({
+            backdrop: "static",
+            keyboard: false
+        });
     });
 
     $("#modal-root-remove").on("show.bs.modal", function (event) {
@@ -20,7 +23,11 @@
         modal.find("#remove-button").on("click", function () {
             FolderManager.Remove(modal.find("#folderid").val());
         });
-    })
+    });
+
+    $("#modal-save").on("shown.bs.modal", function (event) {
+        FolderManager.SaveAll();
+    });
 });
 
 var WorkSiteFolder = (function () {
@@ -126,7 +133,8 @@ var WorkSiteFolder = (function () {
                     gridSelectAll.addClass("disabled");
                     gridDeSelectAll.addClass("disabled");
                     gridRemoveSelected.addClass("disabled");
-                } else {
+                }
+                else {
                     gridSelectAll.removeClass("disabled");
                     gridSelectAll.on("click", function () {
                         folder.GridRef.find("tr").each(function () {
@@ -151,7 +159,11 @@ var WorkSiteFolder = (function () {
                             gridDeSelectAll.addClass("disabled");
                             gridRemoveSelected.addClass("disabled");
                         }
-                        folder.ActiveNodeRef.documents = dt.data();
+                        var docs = dt.data();
+                        folder.ActiveNodeRef.documents = [];
+                        for (var i = 0; i < docs.length; i++) {
+                            folder.ActiveNodeRef.documents[i] = docs[i];
+                        }
                         return false;
                     });
                 }
@@ -416,12 +428,43 @@ var WorkSiteFolder = (function () {
         });
     }
 
-    WorkSiteFolder.prototype.GetData = function () {
-        var data = JSON.stringify(this.TreeData);
-
-        var d = data;
+    WorkSiteFolder.prototype.Save = function () {
+        var folder = this;
+        var data;
+        if (Object === folder.TreeData.constructor) {
+            // todo: there must be an equivalent filtering function that doesn't require serializing/deserializing
+            // todo: look at $.map()
+            var str = JSON.stringify(folder.TreeData, ["id", "server", "database", "children", "documents", "text", "docnum"]);
+            data = JSON.parse(str);
+        } else {
+            data = {
+                id: folder.Id,
+                server: folder.Server,
+                database: folder.Database,
+                children: folder.SubFolderCount > 0,
+                documents: folder.DocumentCount > 0,
+                text: folder.Name
+            };
+        }
+        $.ajax({
+            url: _serviceUrl,
+            headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
+            async: false,
+            cache: false,
+            type: "post",
+            data: data,
+            dataType: "json",
+            //dataType: "text",
+            success: function () {
+                // todo: update the dialog
+                alert("saved");
+            },
+            error: function () {
+                // todo: update the dialog
+                alert("failed");
+            }
+        });
     }
-
     return WorkSiteFolder;
 })();
 
@@ -468,12 +511,11 @@ var FolderManager = function () {
         _rootFolders[folderId].HideDetails();
     }
 
-    var _save = function () {
-        var folders = [];
+    var _saveAll = function () {
         for (var folderId in _rootFolders) {
             var folder = _rootFolders[folderId];
-            var data = folder.GetData();
-            folders[folderId] = data;
+            var saved = folder.Save();
+            // todo: 
         }
     }
 
@@ -502,8 +544,8 @@ var FolderManager = function () {
             }
         },
 
-        Save: function () {
-            _save();
+        SaveAll: function () {
+            _saveAll();
         }
     }
 }();

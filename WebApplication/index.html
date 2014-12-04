@@ -115,7 +115,6 @@
         </div>
     </div>
 
-    <!-- Modal -->
     <div class="modal fade" id="modal-root-remove" tabindex="-1" role="dialog" aria-labelledby="modal-root-remove-label" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -130,6 +129,22 @@
                     <button id="remove-button" type="button" class="btn btn-danger" data-dismiss="modal">Remove</button>
                 </div>
                 <input type="hidden" id="folderid" />
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-save" tabindex="-1" role="dialog" aria-labelledby="modal-save-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header alert-info">
+                    <h4 class="modal-title" id="modal-save-label">Saving...</h4>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="images/ajax-loader.gif" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default disabled" data-dismiss="modal">OK</button>
+                </div>
             </div>
         </div>
     </div>
