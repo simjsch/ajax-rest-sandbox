@@ -32,9 +32,9 @@
 
 var WorkSiteFolder = (function () {
     // *** private properties
-    var _serviceUrl = "http://localhost:666/FolderMapperService/api/folders/";
-    var _dmsUsername = "sschoch";
-    var _dmsPassword = "Ph0en1xbs";
+    var _serviceUrl = "http://sp2007-dev-02:666/WorksiteWeb.svc/";
+    var _dmsUsername = "wsadmin";
+    var _dmsPassword = "phoenix";
 
     // *** public properties
     this.Id;
@@ -238,7 +238,7 @@ var WorkSiteFolder = (function () {
         if (Array !== folder.ActiveNodeRef.documents.constructor) {
             if (true === folder.ActiveNodeRef.documents) {
                 $.ajax({
-                    url: _serviceUrl + folder.Database + "/" + nodeId + "/documents",
+                    url: _serviceUrl + "GetDocuments?database=" + folder.Database + "&id=" + nodeId,
                     headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
                     type: "get",
                     dataType: "json",
@@ -277,7 +277,7 @@ var WorkSiteFolder = (function () {
                             cb.call(this, treeData);
                         } else {
                             $.ajax({
-                                url: _serviceUrl + folder.Database + "/" + node.id + "/documentfolder/tree",
+                                url: _serviceUrl + "GetTree?database=" + folder.Database + "&id=" + node.id + "&type=documentfolder",
                                 headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
                                 type: "get",
                                 dataType: "json",
@@ -344,7 +344,7 @@ var WorkSiteFolder = (function () {
         var folder = this;
         if (folder.TreeData && Array !== folder.TreeData.constructor) {
             $.ajax({
-                url: _serviceUrl + folder.Database + "/" + folder.Id + "/" + folder.Type + "/tree",
+                url: _serviceUrl + "GetTree?database=" + folder.Database + "&id=" + folder.Id + "&type=" + folder.Type,
                 headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
                 type: "get",
                 dataType: "json",
@@ -373,11 +373,12 @@ var WorkSiteFolder = (function () {
             $("#main").append(placeHolder.html());
             $.ajax({
                 // todo: remove Type from here once the core library is updated
-                url: _serviceUrl + folder.Database + "/" + folder.Id + "/" + folder.Type + "/summary",
+                url: _serviceUrl + "GetSummary?database=" + folder.Database + "&id=" + folder.Id + "&type=" + folder.Type,
                 headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
                 async: true,
                 type: "get",
                 dataType: "json",
+                cache: false,
                 success: function (summary) {
                     folder.Name = summary.name;
                     folder.Type = summary.type;
@@ -447,14 +448,13 @@ var WorkSiteFolder = (function () {
             };
         }
         $.ajax({
-            url: _serviceUrl,
+            url: _serviceUrl + "SaveFolder",
             headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
             async: false,
             cache: false,
             type: "post",
             data: data,
             dataType: "json",
-            //dataType: "text",
             success: function () {
                 // todo: update the dialog
                 alert("saved");
