@@ -32,7 +32,7 @@
 
 var WorkSiteFolder = (function () {
     // *** private properties
-    var _serviceUrl = "http://sp2007-dev-02:666/WorksiteWeb.svc/";
+    var _serviceUrl = "http://sp2007-dev-02:333/Service/WorksiteWeb.svc/";
     var _dmsUsername = "wsadmin";
     var _dmsPassword = "phoenix";
 
@@ -432,11 +432,10 @@ var WorkSiteFolder = (function () {
     WorkSiteFolder.prototype.Save = function () {
         var folder = this;
         var data;
+        var str;
+
         if (Object === folder.TreeData.constructor) {
-            // todo: there must be an equivalent filtering function that doesn't require serializing/deserializing
-            // todo: look at $.map()
-            var str = JSON.stringify(folder.TreeData, ["id", "server", "database", "children", "documents", "text", "docnum"]);
-            data = JSON.parse(str);
+            str = JSON.stringify($.extend(folder.TreeData, {database: folder.Database}), ["id", "server", "database", "children", "documents", "text", "docnum"]);
         } else {
             data = {
                 id: folder.Id,
@@ -446,6 +445,7 @@ var WorkSiteFolder = (function () {
                 documents: folder.DocumentCount > 0,
                 text: folder.Name
             };
+            str = JSON.stringify(data);
         }
         $.ajax({
             url: _serviceUrl + "SaveFolder",
@@ -453,8 +453,8 @@ var WorkSiteFolder = (function () {
             async: false,
             cache: false,
             type: "post",
-            data: data,
-            dataType: "json",
+            data: str,
+            contentType: "text/plain",
             success: function () {
                 // todo: update the dialog
                 alert("saved");

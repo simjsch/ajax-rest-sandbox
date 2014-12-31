@@ -144,7 +144,9 @@
     <Content Include="Scripts\npm.js" />
     <Content Include="Scripts\PhoenixBS.BrowseFolder.js" />
     <Content Include="Scripts\WorkSiteBrowser\WorkSiteBrowser.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
