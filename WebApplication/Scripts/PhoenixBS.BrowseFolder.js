@@ -32,6 +32,7 @@
 
 var WorkSiteFolder = (function () {
     // *** private properties
+    // todo: [pre-release] get these from config
     var _serviceUrl = "http://sp2007-dev-02:333/Service/WorksiteWeb.svc/";
     var _dmsUsername = "wsadmin";
     var _dmsPassword = "phoenix";
@@ -307,25 +308,9 @@ var WorkSiteFolder = (function () {
             _initGrid.call(folder, nodeId)
         });
 
-        //folder.DetailsRowRef.find("#btn-tree-selectall-pbs-" + folder.Id).click(function () {
-        //    //folder.TreeRef.jstree("check_all");
-        //    folder.TreeRef.jstree("select_all");
-        //    return false;
-        //});
-
-        //folder.DetailsRowRef.find("#btn-tree-deselectall-pbs-" + folder.Id).click(function () {
-        //    //folder.TreeRef.jstree("uncheck_all");
-        //    folder.TreeRef.jstree("deselect_all");
-        //    return false;
-        //});
-
         folder.DetailsRowRef.find("#btn-tree-removeselected-pbs-" + folder.Id).click(function () {
-            //var nodes = folder.TreeRef.jstree("get_checked");
-            //var nodes = folder.TreeRef.jstree("get_selected");
             var nodeId = folder.TreeRef.jstree("get_selected")[0];
 
-            //for (var i = 0; i < nodes.length; i++) {
-            //    var nodeId = nodes[i];
             var node = folder.TreeRef.jstree("get_node", nodeId);
             if ("#" === node.parent) {
                 $("#modal-root-remove").find("#folderid").val(node.id);
@@ -335,7 +320,6 @@ var WorkSiteFolder = (function () {
                 folder.TreeRef.jstree("delete_node", node);
                 folder.TreeRef.jstree("select_node", folder.Id);
             }
-            //}
             return false;
         });
     }
@@ -372,7 +356,7 @@ var WorkSiteFolder = (function () {
 
             $("#main").append(placeHolder.html());
             $.ajax({
-                // todo: remove Type from here once the core library is updated
+                // todo: [refactor] remove Type from here once the core library is updated
                 url: _serviceUrl + "GetSummary?database=" + folder.Database + "&id=" + folder.Id + "&type=" + folder.Type,
                 headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
                 async: true,
@@ -434,13 +418,21 @@ var WorkSiteFolder = (function () {
         var data;
         var str;
 
+        var openLatest = $("#openlatest-pbs-" + folder.Id)[0].checked;
+
         if (Object === folder.TreeData.constructor) {
-            str = JSON.stringify($.extend(folder.TreeData, {database: folder.Database}), ["id", "server", "database", "children", "documents", "text", "docnum"]);
+            str = JSON.stringify($.extend(folder.TreeData,
+            {
+                database: folder.Database,
+                openlatest: openLatest
+            }),
+            ["id", "server", "database", "children", "documents", "text", "docnum"]);
         } else {
             data = {
                 id: folder.Id,
                 server: folder.Server,
                 database: folder.Database,
+                openlatest: openLatest,
                 children: folder.SubFolderCount > 0,
                 documents: folder.DocumentCount > 0,
                 text: folder.Name
@@ -450,17 +442,17 @@ var WorkSiteFolder = (function () {
         $.ajax({
             url: _serviceUrl + "SaveFolder",
             headers: { "dmsServer": folder.Server, "dmsUsername": _dmsUsername, "dmsPassword": _dmsPassword },
-            async: false,
+            async: true,
             cache: false,
             type: "post",
             data: str,
             contentType: "text/plain",
             success: function () {
-                // todo: update the dialog
+                // todo: [pre-release] update the dialog
                 alert("saved");
             },
             error: function () {
-                // todo: update the dialog
+                // todo: [pre-release] update the dialog
                 alert("failed");
             }
         });
@@ -515,7 +507,7 @@ var FolderManager = function () {
         for (var folderId in _rootFolders) {
             var folder = _rootFolders[folderId];
             var saved = folder.Save();
-            // todo: 
+            // todo: [pre-release] update the dialog
         }
     }
 
@@ -548,4 +540,4 @@ var FolderManager = function () {
             _saveAll();
         }
     }
-}();
+} ();
