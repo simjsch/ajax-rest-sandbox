@@ -60,6 +60,7 @@ var WorkSiteFolder = (function () {
     // data
     this.TreeData;
     this.ActiveNodeRef;
+    this.SaveComplete = false;
 
     // *** constructor
     function WorkSiteFolder(id, parentId, server, database, type) {
@@ -413,12 +414,13 @@ var WorkSiteFolder = (function () {
         });
     }
 
-    WorkSiteFolder.prototype.Save = function () {
+    WorkSiteFolder.prototype.Save = function (promises) {
         var folder = this;
         var data;
         var str;
 
         var openLatest = $("#openlatest-pbs-" + folder.Id)[0].checked;
+        var oldProgress = $("#progress-pbs-" + folder.Id);
 
         if (Object === folder.TreeData.constructor) {
             str = JSON.stringify($.extend(folder.TreeData,
@@ -448,13 +450,27 @@ var WorkSiteFolder = (function () {
             data: str,
             contentType: "text/plain",
             success: function () {
-                // todo: [pre-release] update the dialog
-                alert("saved");
+                var progress = $(
+'<div class="alert alert-success" id="progress-pbs-' + folder.Id + '">' +
+'   <strong>' + folder.Name + '</strong>' +
+'       <div class="progress progress-striped">' +
+'           <div class="progress-bar progress-bar-success" style="width: 100%"></div>' +
+'       </div>' +
+'</div>');
+                oldProgress.replaceWith(progress);
+                folder.SaveComplete = true;
             },
             error: function () {
-                // todo: [pre-release] update the dialog
-                alert("failed");
-            }
+                var progress = $(
+'<div class="alert alert-error" id="progress-pbs-' + folder.Id + '">' +
+'   <strong>' + folder.Name + '</strong>' +
+'       <div class="progress progress-striped">' +
+'           <div class="progress-bar progress-bar-error" style="width: 100%"></div>' +
+'       </div>' +
+'</div>');
+                oldProgress.replaceWith(progress);
+                folder.SaveComplete = true;
+            },
         });
     }
     return WorkSiteFolder;
@@ -462,6 +478,7 @@ var WorkSiteFolder = (function () {
 
 var FolderManager = function () {
     var _rootFolders = [];
+    var _intervalId;
 
     var _init = function (folders) {
         $.each(folders, function (i, e) {
@@ -503,12 +520,36 @@ var FolderManager = function () {
         _rootFolders[folderId].HideDetails();
     }
 
+    var _checkSaveProgress = function () {
+        var complete = true;
+        for (var folderId in _rootFolders) {
+            var folder = _rootFolders[folderId];
+            if (!folder.SaveComplete) {
+                complete = false;
+            }
+        }
+        if (complete) {
+            clearInterval(_intervalId);
+            $("#modal-save").find("button").removeClass("disabled");
+        }
+    }
+
     var _saveAll = function () {
         for (var folderId in _rootFolders) {
             var folder = _rootFolders[folderId];
-            var saved = folder.Save();
-            // todo: [pre-release] update the dialog
+
+            var modalBody = $("#modal-save-body");
+            var progress = $(
+'<div class="alert alert-info" id="progress-pbs-' + folder.Id + '">' +
+'   <strong>' + folder.Name + '</strong>' +
+'       <div class="progress progress-striped active">' +
+'           <div class="progress-bar progress-bar-info" style="width: 100%"></div>' +
+'       </div>' +
+'</div>');
+            modalBody.append(progress);
+            folder.Save();
         }
+        _intervalId = setInterval(_checkSaveProgress, 500);
     }
 
     return {
