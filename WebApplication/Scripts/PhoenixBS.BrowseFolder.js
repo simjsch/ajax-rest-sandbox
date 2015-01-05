@@ -1,6 +1,9 @@
 ﻿$(function () {
     WorkSiteBrowser.Init();
 
+    // nasty sharepoint css class that causes issues with bootstrap
+    $("table.ms-propertysheet").removeClass("ms-propertysheet");
+
     $("#browse").click(function () {
         var folders = WorkSiteBrowser.SelectFolders();
 
@@ -28,14 +31,15 @@
     $("#modal-save").on("shown.bs.modal", function (event) {
         FolderManager.SaveAll();
     });
+
+    $("#modal-save").on("hidden.bs.modal", function (event) {
+        window.location = $("input[id$='_hdnSource']").val();
+    });
 });
 
 var WorkSiteFolder = (function () {
     // *** private properties
-    // todo: [pre-release] get these from config
-    var _serviceUrl = "http://sp2007-dev-02:333/Service/WorksiteWeb.svc/";
-    var _dmsUsername = "wsadmin";
-    var _dmsPassword = "phoenix";
+    var _serviceUrl, _dmsUsername, _dmsPassword;
 
     // *** public properties
     this.Id;
@@ -64,6 +68,14 @@ var WorkSiteFolder = (function () {
 
     // *** constructor
     function WorkSiteFolder(id, parentId, server, database, type) {
+        _serviceUrl = $("input[id$='_hdnServiceUrl']").val();
+        if ('/' !== _serviceUrl.charAt(_serviceUrl.length - 1)) {
+            _serviceUrl += "/";
+        }
+
+        _dmsUsername = $("input[id$='_hdnDmsUsername']").val();
+        _dmsPassword = $("input[id$='_hdnDmsPassword']").val();
+
         this.Id = id;
         this.ParentId = parentId;
         this.Server = server;
@@ -319,6 +331,7 @@ var WorkSiteFolder = (function () {
             } else {
                 _findNode(folder.TreeData.children, node.id, true);
                 folder.TreeRef.jstree("delete_node", node);
+                folder.TreeRef.jstree("refresh");
                 folder.TreeRef.jstree("select_node", folder.Id);
             }
             return false;
@@ -421,12 +434,16 @@ var WorkSiteFolder = (function () {
 
         var openLatest = $("#openlatest-pbs-" + folder.Id)[0].checked;
         var oldProgress = $("#progress-pbs-" + folder.Id);
+        var siteUrl = $("input[id$='_hdnSiteUrl']").val();
+        var listId = $("input[id$='_hdnListId']").val();
 
         if (Object === folder.TreeData.constructor) {
             str = JSON.stringify($.extend(folder.TreeData,
             {
                 database: folder.Database,
-                openlatest: openLatest
+                openlatest: openLatest,
+                siteurl: siteUrl,
+                listid: listId
             }),
             ["id", "server", "database", "children", "documents", "text", "docnum"]);
         } else {
@@ -435,6 +452,8 @@ var WorkSiteFolder = (function () {
                 server: folder.Server,
                 database: folder.Database,
                 openlatest: openLatest,
+                siteurl: siteUrl,
+                listid: listId,
                 children: folder.SubFolderCount > 0,
                 documents: folder.DocumentCount > 0,
                 text: folder.Name
@@ -462,10 +481,10 @@ var WorkSiteFolder = (function () {
             },
             error: function () {
                 var progress = $(
-'<div class="alert alert-error" id="progress-pbs-' + folder.Id + '">' +
+'<div class="alert alert-danger" id="progress-pbs-' + folder.Id + '">' +
 '   <strong>' + folder.Name + '</strong>' +
 '       <div class="progress progress-striped">' +
-'           <div class="progress-bar progress-bar-error" style="width: 100%"></div>' +
+'           <div class="progress-bar progress-bar-danger" style="width: 100%"></div>' +
 '       </div>' +
 '</div>');
                 oldProgress.replaceWith(progress);
