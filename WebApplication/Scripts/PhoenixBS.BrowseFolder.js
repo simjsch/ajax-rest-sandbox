@@ -1,4 +1,6 @@
 ﻿$(function () {
+    jQuery.support.cors = true;
+
     WorkSiteBrowser.Init();
 
     // nasty sharepoint css class that causes issues with bootstrap
